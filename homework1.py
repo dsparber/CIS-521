@@ -92,7 +92,7 @@ def digits_to_words(text):
 def to_mixed_case(name):
     res = ''.join([part.lower().capitalize() for part in name.split('_') if part])
     if res:
-        return res[0].lower() + res[1:0]
+        return res[0].lower() + res[1:]
     return ""
 
 ############################################################
