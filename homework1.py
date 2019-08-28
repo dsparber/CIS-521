@@ -2,31 +2,22 @@
 # CIS 521: Homework 1
 ############################################################
 
-student_name = "Type your full name here."
+student_name = "Daniel Sparber"
 
 ############################################################
 # Section 1: Python Concepts - Study Questions
 ############################################################
 
 python_concepts_question_1 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
-This question will not be graded.
+Omitted
 """
 
 python_concepts_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
-This question will not be graded.
+Omitted
 """
 
 python_concepts_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
-This question will not be graded.
+Omitted
 """
 
 ############################################################
@@ -34,55 +25,72 @@ This question will not be graded.
 ############################################################
 
 def extract_and_apply(l, p, f):
-    pass
+    return [f(x) for x in l if p(x)]
 
 def concatenate(seqs):
-    pass
+    return [x for seq in seqs for x in seq]
 
 def transpose(matrix):
-    pass
+    return [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]
 
 ############################################################
 # Section 3: Sequence Slicing
 ############################################################
 
 def copy(seq):
-    pass
+    return seq[:]
 
 def all_but_last(seq):
-    pass
+    return seq[:-1]
 
 def every_other(seq):
-    pass
+    return seq[::2]
 
 ############################################################
 # Section 4: Combinatorial Algorithms
 ############################################################
 
 def prefixes(seq):
-    pass
+    for i in range(len(seq) + 1):
+        yield seq[:i]
 
 def suffixes(seq):
-    pass
+    for i in range(len(seq) + 1):
+        yield seq[i:]
 
 def slices(seq):
-    pass
+    for start in range(len(seq) + 1):
+        for end in range(start + 1, len(seq) + 1):
+            yield seq[start:end]
 
 ############################################################
 # Section 5: Text Processing
 ############################################################
 
 def normalize(text):
-    pass
+    return " ".join([word.lower() for word in text.split(" ")])
 
 def no_vowels(text):
-    pass
+    return ''.join([c for c in text if c.lower() not in ['a', 'e', 'i', 'o', 'u']])
 
 def digits_to_words(text):
-    pass
+    digits = {
+        '1': "one",
+        '2': "two",
+        '3': "three",
+        '4': "four",
+        '5': "five",
+        '6': "six",
+        '7': "seven",
+        '8': "eight",
+        '9': "nine",
+        '0': "zero"
+    }
+    return " ".join([digits[c] for c in text if c in digits.keys()])
+
 
 def to_mixed_case(name):
-    pass
+    return ''.join([part.lower().capitalize() for part in name.split('_') if part])
 
 ############################################################
 # Section 6: Polynomials
@@ -91,53 +99,87 @@ def to_mixed_case(name):
 class Polynomial(object):
 
     def __init__(self, polynomial):
-        pass
+        self.value = tuple(polynomial) 
 
     def get_polynomial(self):
-        pass
+        return self.value
 
     def __neg__(self):
-        pass
+        return Polynomial([(-k, x) for k, x in self.value])
 
     def __add__(self, other):
-        pass
+        return Polynomial(list(self.value + other.value))
 
     def __sub__(self, other):
-        pass
+        return Polynomial(list(self.value + (-other).value))
 
     def __mul__(self, other):
-        pass
+        result = []
+        for k1, x1 in self.value:
+            for k2, x2 in other.value:
+                result.append((k1 * k2, x1 + x2))
+        return Polynomial(result)
 
     def __call__(self, x):
-        pass
+        return sum([c * x**deg for c, deg in self.value])
 
     def simplify(self):
-        pass
+        values = dict()
+
+        if self.value:
+            for c, d in self.value:
+                values[d] = c + values.get(d, 0)
+
+        value = tuple(sorted([(c, d) for d, c in values.items() if c != 0], key=lambda t: -t[1]))
+        
+        if not value:
+            value = ((0, 0))
+
+        self.value = value
 
     def __str__(self):
-        pass
+        output = ""
+
+        def to_str(c, d):
+            if d == 0:
+                return str(abs(c))
+            if d == 1:
+                return "{}x".format(abs(c))
+            if abs(c) == 1:
+                return "x^{}".format(d)
+            return "{}x^{}".format(abs(c), d)
+                
+        
+        for i in range(len(self.value)):
+            c, d = self.value[i]
+
+            if i == 0:
+                if c >= 0:
+                    output += to_str(c , d)
+                else:
+                    output += "-" + to_str(c, d)
+            else:
+                if c >= 0:
+                    output += " + {}".format(to_str(c, d))
+                else:
+                    output += " - {}".format(to_str(c, d))
+            
+        return output
 
 ############################################################
 # Section 7: Feedback
 ############################################################
 
 feedback_question_1 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
-This question will not be graded.
+1h 50min
 """
 
 feedback_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
-This question will not be graded.
+I did not find any parts challenging.
+There were no stumbling blocks.
 """
 
 feedback_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
-This question will not be graded.
+I liked the slicing exercise.
+Nothing needs to be changed.
 """
