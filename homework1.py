@@ -68,7 +68,7 @@ def slices(seq):
 ############################################################
 
 def normalize(text):
-    return " ".join([word.lower() for word in text.split(" ")])
+    return " ".join([word.lower() for word in text.split(" ") if word])
 
 def no_vowels(text):
     return ''.join([c for c in text if c.lower() not in ['a', 'e', 'i', 'o', 'u']])
@@ -90,7 +90,10 @@ def digits_to_words(text):
 
 
 def to_mixed_case(name):
-    return ''.join([part.lower().capitalize() for part in name.split('_') if part])
+    res = ''.join([part.lower().capitalize() for part in name.split('_') if part])
+    if res:
+        return res[0].lower() + res[1:0]
+    return ""
 
 ############################################################
 # Section 6: Polynomials
@@ -133,7 +136,7 @@ class Polynomial(object):
         value = tuple(sorted([(c, d) for d, c in values.items() if c != 0], key=lambda t: -t[1]))
         
         if not value:
-            value = ((0, 0))
+            value = tuple([(0, 0)])
 
         self.value = value
 
@@ -143,6 +146,8 @@ class Polynomial(object):
         def to_str(c, d):
             if d == 0:
                 return str(abs(c))
+            if d == 1 and abs(c) == 1:
+                return "x"
             if d == 1:
                 return "{}x".format(abs(c))
             if abs(c) == 1:
@@ -171,7 +176,7 @@ class Polynomial(object):
 ############################################################
 
 feedback_question_1 = """
-1h 50min
+2h
 """
 
 feedback_question_2 = """
