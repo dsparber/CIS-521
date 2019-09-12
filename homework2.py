@@ -10,6 +10,7 @@ student_name = "Daniel Sparber"
 
 # Include your imports here, if any are used.
 from math import *
+from random import random
 
 
 ############################################################
@@ -77,31 +78,87 @@ def n_queens_solutions(n):
 class LightsOutPuzzle(object):
 
     def __init__(self, board):
-        pass
+        self.board = board
+        self.rows = len(board)
+        self.cols = len(board[0])
+
+    def __str__(self):
+        return "\n".join(["".join(["T" if v else "F" for v in self.board[row]]) for row in range(self.rows)])
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, value):
+        return str(self) == str(value)
 
     def get_board(self):
-        pass
+        return self.board
 
     def perform_move(self, row, col):
-        pass
+        self.board[row][col] = not self.board[row][col]
+        if row + 1 < self.rows:
+            self.board[row + 1][col] = not self.board[row + 1][col]
+        if row - 1 >= 0:
+            self.board[row - 1][col] = not self.board[row - 1][col]
+        if col + 1 < self.cols:
+            self.board[row][col + 1] = not self.board[row][col + 1]
+        if col - 1 >= 0:
+            self.board[row][col - 1] = not self.board[row][col - 1]
 
     def scramble(self):
-        pass
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if random() < 0.5:
+                    self.perform_move(row, col)
 
     def is_solved(self):
-        pass
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.board[row][col]:
+                    return False
+        return True
 
     def copy(self):
-        pass
+        p = create_puzzle(self.rows, self.cols)
+        for row in range(self.rows):
+            for col in range(self.cols):
+                p.board[row][col] = self.board[row][col]
+        return p
 
     def successors(self):
-        pass
+        for row in range(self.rows):
+            for col in range(self.cols): 
+                sucessor = self.copy()
+                sucessor.perform_move(row, col)
+                yield (row, col), sucessor
 
     def find_solution(self):
-        pass
+        queue = [self]
+        moves = dict()
+        moves[self] = []
+
+
+        while queue:
+            current = queue.pop()
+
+            if current.is_solved():
+                return moves[current]
+
+            for move, neighbor in current.successors():
+                if neighbor not in moves:
+                    moves[neighbor] = moves[current] + [move]
+                    queue.insert(0, neighbor)
 
 def create_puzzle(rows, cols):
-    pass
+    return LightsOutPuzzle([[False for _ in range(cols)] for _ in range(rows)])
+
+p = create_puzzle(2, 2)
+for move, new_p in p.successors():
+    print(move, new_p.get_board())
+
+for i in range(2, 6):
+    p = create_puzzle(i, i)
+    print(len(list(p.successors())))
 
 ############################################################
 # Section 3: Linear Disk Movement
