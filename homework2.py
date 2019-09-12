@@ -11,35 +11,7 @@ student_name = "Daniel Sparber"
 # Include your imports here, if any are used.
 from math import *
 from random import random
-
-
-############################################################
-# Section 0: Additional helper functions by Daniel
-############################################################
-
-def search(search_type, inital_state, get_neighbors, is_goal):
-    
-    if search_type not in ["dfs", "bfs"]:
-        raise "Invalid search type: " + search_type 
-    
-    stack = [inital_state]
-    visited = []
-
-    dfs = search_type == "dfs"
-
-    while stack:
-        current = stack.pop()
-        visited.append(current)
-
-        for neighbor in get_neighbors(current):
-            if neighbor not in visited:
-                if dfs:
-                    stack.append(neighbor)
-                else:
-                    stack.insert(0, neighbor)
-
-        if is_goal(current):
-            yield current
+   
 
 ############################################################
 # Section 1: N-Queens
@@ -60,16 +32,24 @@ def n_queens_valid(board):
     return no_same_column and no_same_diag_1 and no_same_diag_2
 
 def n_queens_helper(n, board):
-    possible = [board + [i] for i in range(n)]
-    return [board for board in possible if n_queens_valid(board)]
+    possible = [list(board) + [i] for i in range(n)]
+    return [tuple(board) for board in possible if n_queens_valid(board)]
 
 def n_queens_solutions(n):
-    return search(
-        search_type="dfs",
-        inital_state=[],
-        get_neighbors=lambda board: n_queens_helper(n, board),
-        is_goal=lambda board: len(board) == n and n_queens_valid(board)
-    )
+    stack = [tuple()]
+    visited = set()
+
+    while stack:
+        current = stack.pop()
+
+        if len(current) == n:
+            if n_queens_valid(current):
+                yield list(current)
+        else:
+            for neighbor in n_queens_helper(n, current):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    stack.append(neighbor)
 
 ############################################################
 # Section 2: Lights Out
