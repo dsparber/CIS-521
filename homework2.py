@@ -152,42 +152,82 @@ class LightsOutPuzzle(object):
 def create_puzzle(rows, cols):
     return LightsOutPuzzle([[False for _ in range(cols)] for _ in range(rows)])
 
-p = create_puzzle(2, 2)
-for move, new_p in p.successors():
-    print(move, new_p.get_board())
-
-for i in range(2, 6):
-    p = create_puzzle(i, i)
-    print(len(list(p.successors())))
 
 ############################################################
 # Section 3: Linear Disk Movement
 ############################################################
 
+def solve_disks(length, num_disks, distinct):
+    
+    initial = tuple([(x if distinct else 1) if x < num_disks else -1 for x in range(length)])
+    goal = initial[::-1]
+
+    def get_neighbors(cells):
+        neighbors = []
+        for index, cell in enumerate(cells):
+            if cell >= 0:
+                # move right
+                if index + 1 < length and cells[index + 1] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index + 1] = cell
+                    neighbors.append(((index, index + 1), tuple(copy)))
+                # move left
+                if index >= 1 and cells[index - 1] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index - 1] = cell
+                    neighbors.append(((index, index - 1), tuple(copy)))
+                # jump right
+                if index + 2 < length and cells[index + 1] != -1 and cells[index + 2] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index + 2] = cell
+                    neighbors.append(((index, index + 2), tuple(copy)))
+                # jump left
+                if index >= 2 and cells[index - 1] != -1 and cells[index - 2] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index - 2] = cell
+                    neighbors.append(((index, index - 2), tuple(copy)))
+
+        return neighbors
+
+    queue = [initial]
+    moves = dict()
+    moves[initial] = []
+
+    while queue:
+        current = queue.pop()
+
+        if current == goal:
+            return moves[current]
+
+        for move, neighbor in get_neighbors(current):
+            if neighbor not in moves:
+                moves[neighbor] = moves[current] + [move]
+                queue.insert(0, neighbor)
+
+
 def solve_identical_disks(length, n):
-    pass
+    return solve_disks(length, n, False)
 
 def solve_distinct_disks(length, n):
-    pass
+    return solve_disks(length, n, True)
+
 
 ############################################################
 # Section 4: Feedback
 ############################################################
 
 feedback_question_1 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+3h
 """
 
 feedback_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+The assignment was not challenging, there were no stumbling blocks
 """
 
 feedback_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+I liked everything. The assignment was great fun!
 """
