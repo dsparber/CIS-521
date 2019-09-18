@@ -11,7 +11,7 @@ student_name = "Daniel Sparber"
 # Include your imports here, if any are used.
 import random
 import heapq
-from math import sqrt
+from math import sqrt, ceil
 
 
 ############################################################
@@ -154,17 +154,21 @@ class TilePuzzle(object):
         distance = dict()
         distance[self.as_tuple()] = h(self)
 
+        g = dict()
+        g[self.as_tuple()] = 0
+
         path = dict()
         path[self.as_tuple()] = []
 
         while queue:
-            g, node = heapq.heappop(queue)
+            _, node = heapq.heappop(queue)
 
             if node.is_solved():
                 return path[node.as_tuple()]
             
             for move, neighbor in node.successors():
-                f = (g + 1) + h(node)
+                g[neighbor.as_tuple()] = g[node.as_tuple()] + 1
+                f = g[neighbor.as_tuple()] + h(neighbor)
 
                 visited = neighbor.as_tuple() in distance
 
@@ -209,26 +213,31 @@ def find_path(start, goal, scene):
 
     queue = [(h(start), start)]
 
-    distance = dict()
-    distance[start] = h(start)
+    f = dict()
+    f[start] = h(start)
+
+    g = dict()
+    g[start] = 0
 
     path = dict()
     path[start] = [start]
 
     while queue:
-        g, node = heapq.heappop(queue)
+        _, node = heapq.heappop(queue)
 
         if node == goal:
             return path[node]
         
         for neighbor in get_neighbors(node):
-            f = (g + cost(node, neighbor)) + h(node)
+            g_neighbor = g[node] + cost(node, neighbor)
+            f_neighbor = g_neighbor+ h(neighbor)
 
-            visited = neighbor in distance
+            visited = neighbor in f
 
-            if not visited or f < distance[neighbor]:
-                heapq.heappush(queue, (f, neighbor))
-                distance[neighbor] = f
+            if not visited or f_neighbor < f[neighbor]:
+                heapq.heappush(queue, (f_neighbor, neighbor))
+                f[neighbor] = f_neighbor
+                g[neighbor] = g_neighbor
                 path[neighbor] = path[node] + [neighbor]
 
 
@@ -238,14 +247,82 @@ def find_path(start, goal, scene):
 ############################################################
 
 def solve_distinct_disks(length, n):
-    pass
+    start = tuple(list(range(n)) + [-1] * (length - n))
+    goal = start[::-1]
+
+    def get_neighbors(cells):
+        neighbors = []
+        for index, cell in enumerate(cells):
+            if cell >= 0:
+                # move right
+                if index + 1 < length and cells[index + 1] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index + 1] = cell
+                    neighbors.append(((index, index + 1), tuple(copy)))
+                # move left
+                if index >= 1 and cells[index - 1] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index - 1] = cell
+                    neighbors.append(((index, index - 1), tuple(copy)))
+                # jump right
+                if index + 2 < length and cells[index + 1] != -1 and cells[index + 2] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index + 2] = cell
+                    neighbors.append(((index, index + 2), tuple(copy)))
+                # jump left
+                if index >= 2 and cells[index - 1] != -1 and cells[index - 2] == -1:
+                    copy = list(cells)
+                    copy[index] = -1
+                    copy[index - 2] = cell
+                    neighbors.append(((index, index - 2), tuple(copy)))
+
+        return neighbors
+
+    def h(node):
+        sum = 0
+        for x in range(n):
+            diff =  ceil(abs(node.index(x) - goal.index(x)) / 2)
+            sum += diff
+        return sum
+
+    queue = [(h(start), start)]
+
+    distance = dict()
+    distance[start] = h(start)
+
+    g = dict()
+    g[start] = 0
+
+    path = dict()
+    path[start] = []
+
+    while queue:
+        _, node = heapq.heappop(queue)
+
+        if node == goal:
+            return path[node]
+        
+        for move, neighbor in get_neighbors(node):
+            g[neighbor] = g[node] + 1
+            f = g[neighbor] + h(neighbor)
+
+            visited = neighbor in distance
+
+            if not visited or f < distance[neighbor]:
+                heapq.heappush(queue, (f, neighbor))
+                distance[neighbor] = f
+                path[neighbor] = path[node] + [move]
+
 
 ############################################################
 # Section 4: Feedback
 ############################################################
 
 # Just an approximation is fine.
-feedback_question_1 = 2.5
+feedback_question_1 = 4.5
 
 feedback_question_2 = """
 Finding out how priority queues work in python was the most challenging part
@@ -254,9 +331,3 @@ Finding out how priority queues work in python was the most challenging part
 feedback_question_3 = """
 I liked everything.
 """
-
-
-scene = [[False, True, False],
-          [False, True, False],
-          [False, True, False]]
-print(find_path((0, 0), (0, 2), scene))
