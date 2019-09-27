@@ -70,7 +70,9 @@ class Sudoku(object):
         string = ""
         for row in range(9):
             for col in range(9):
-                if len(self.get_values((row, col))) == 1:
+                if len(self.get_values((row, col))) == 0:
+                    string += "-"
+                elif len(self.get_values((row, col))) == 1:
                     string += str(list(self.get_values((row, col)))[0])
                 else:
                     string += "_"
@@ -144,21 +146,41 @@ class Sudoku(object):
         if changed:
             self.infer_improved()
 
+    def get_first_undecided(self):
+        for cell in self.CELLS:
+            if len(self.get_values(cell)) > 1:
+                return cell
 
     def infer_with_guessing(self):
         self.infer_improved()
 
-        # TODO guess
-        self.infer_improved()
-
         if self.solved():
             return
+
+
+        # Tree search with deterministic guessing
+        stack = []
+        cell = self.get_first_undecided()
+        for value in self.get_values(cell):
+            stack.append((cell, value, self.board))
         
-        if self.unsolveable():
-            pass
-            # TODO backtrack
-        
-        self.infer_with_guessing()
+        while stack:
+            cell, value, board = stack.pop()
+
+            self.board = dict(board)
+            self.board[cell] = {value}
+
+            self.infer_improved()
+
+            if self.solved():
+                return
+
+            if not self.unsolveable():
+                cell = self.get_first_undecided()
+                for value in self.get_values(cell):
+                    stack.append((cell, value, self.board))
+
+
 
 ############################################################
 # Section 2: Dominoes Games
@@ -209,7 +231,7 @@ class DominoesGame(object):
 ############################################################
 
 # Just an approximation is fine.
-feedback_question_1 = 2.75
+feedback_question_1 = 3
 
 feedback_question_2 = """
 Type your response here.
@@ -222,9 +244,3 @@ Type your response here.
 Your response may span multiple lines.
 Do not include these instructions in your response.
 """
-
-
-
-sudoku = Sudoku(read_board("sudoku/medium2.txt"))
-sudoku.infer_improved()
-print(sudoku)
