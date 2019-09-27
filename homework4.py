@@ -9,7 +9,7 @@ student_name = "Daniel Sparber"
 ############################################################
 
 # Include your imports here, if any are used.
-
+import random
 
 
 ############################################################
@@ -186,61 +186,126 @@ class Sudoku(object):
 # Section 2: Dominoes Games
 ############################################################
 
+inf = 1e9
+
 def create_dominoes_game(rows, cols):
-    pass
+    return DominoesGame([[False] * cols for _ in range(rows)])
 
 class DominoesGame(object):
 
     # Required
     def __init__(self, board):
-        pass
+        self.board = board
+        self.rows = len(board)
+        self.cols = len(board[0])
 
     def get_board(self):
-        pass
+        return self.board
 
     def reset(self):
-        pass
+        self.board = [[False] * self.cols  for _ in range(self.rows)]
 
     def is_legal_move(self, row, col, vertical):
-        pass
+        # Out of bounds
+        if not (0 <= row < self.rows) or not (0 <= col < self.cols):
+            return False
+
+        # Cell occupied
+        if self.board[row][col]:
+            return False
+        
+        # Vertical 
+        if vertical:
+            return row + 1 < self.rows and not self.board[row + 1][col]
+        else:
+            return col + 1 < self.cols and not self.board[row][col + 1]
 
     def legal_moves(self, vertical):
-        pass
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.is_legal_move(row, col, vertical):
+                    yield (row, col)
 
     def perform_move(self, row, col, vertical):
-        pass
+        self.board[row][col] = True
+        if vertical:
+            self.board[row + 1][col] = True
+        else:
+            self.board[row][col + 1] = True
 
     def game_over(self, vertical):
-        pass
+        return len(list(self.legal_moves(vertical))) == 0
 
     def copy(self):
-        pass
+        copy = [[self.board[row][col] for col in range(self.cols)] for row in range(self.rows)]
+        return DominoesGame(copy)
 
     def successors(self, vertical):
-        pass
+        for row, col in self.legal_moves(vertical):
+            copy = self.copy()
+            copy.perform_move(row, col, vertical)
+            yield (row, col), copy 
 
     def get_random_move(self, vertical):
-        pass
+        return random.choice(list(self.legal_moves(vertical)))
+
+    def score(self, vertical):
+        return len(list(self.legal_moves(vertical))) - len(list(self.legal_moves(not vertical)))
+
+    def max_value(self, vertical, alpha, beta, limit): 
+        # Terminal states
+        if limit == 0  or self.game_over(vertical):
+            return self.score(vertical), None, 1
+        
+        value = -inf
+        best_move = None
+        visited_count = 0
+        for move, game in self.successors(vertical):
+            other_value, _, visited = game.min_value(vertical, alpha, beta, limit - 1)
+            visited_count += visited
+            if other_value > value:
+                value = other_value
+                best_move = move
+            if value >= beta:
+                return value, best_move, visited_count
+            alpha = max(alpha, value)
+        return value, best_move, visited_count
+
+    def min_value(self, vertical, alpha, beta, limit):
+        # Terminal states
+        if limit == 0 or self.game_over(not vertical):
+            return self.score(vertical), None, 1
+
+        value = inf
+        best_move = None
+        visited_count = 0
+        for move, game in self.successors(not vertical):
+            other_value, _, visited = game.max_value(vertical, alpha, beta, limit - 1)
+            visited_count += visited
+            if other_value < value:
+                value = other_value
+                best_move = best_move
+            if value <= alpha:
+                return value, best_move, visited_count
+            beta = min(beta, value)
+        return value, best_move, visited_count
 
     # Required
     def get_best_move(self, vertical, limit):
-        pass
+        value, move, visited = self.max_value(vertical, -inf, inf, limit)
+        return move, value, visited
         
 ############################################################
 # Section 3: Feedback
 ############################################################
 
 # Just an approximation is fine.
-feedback_question_1 = 3
+feedback_question_1 = 4.75
 
 feedback_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+Nothing in particular. There were no siginificant stumbling blocks.
 """
 
 feedback_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+I liked everything
 """

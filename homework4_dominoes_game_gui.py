@@ -6,7 +6,7 @@ import homework4
 class Square(tkinter.Canvas):
 
     COLOR_EMPTY = "white"
-    COLOR_FILLED = "gray50"
+    COLOR_FILLED = "green"
 
     def __init__(self, master, size=50):
         tkinter.Canvas.__init__(self, master, height=size, width=size,
@@ -120,7 +120,7 @@ class DominoesGUI(tkinter.Frame):
 if __name__ == "__main__":
     root = tkinter.Tk()
     root.title("Dominoes Game")
-    rows, cols = sys.argv[1:]
+    rows, cols = 4, 4 #sys.argv[1:]
     DominoesGUI(root, int(rows), int(cols)).pack()
     root.resizable(height=False, width=False)
     root.mainloop()
