@@ -35,7 +35,7 @@ def sudoku_box_arcs():
     return arcs
 
 def sudoku_arcs():
-    return sudoku_row_arcs() + sudoku_col_arcs() + sudoku_box_arcs()
+    return list(set(sudoku_row_arcs() + sudoku_col_arcs() + sudoku_box_arcs()))
 
 
 def read_board(path):
@@ -61,7 +61,7 @@ class Sudoku(object):
     ROW_ARCS = sudoku_row_arcs()
     COL_ARCS = sudoku_col_arcs()
     BOX_ARCS = sudoku_box_arcs()
-    ARCS = ROW_ARCS + COL_ARCS + BOX_ARCS
+    ARCS = sudoku_arcs()
 
     def __init__(self, board):
         self.board = dict(board)
