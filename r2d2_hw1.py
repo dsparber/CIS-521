@@ -2,7 +2,7 @@
 # CIS 521: R2D2-Homework 1
 ############################################################
 
-student_name = "Daniel Sparber"
+student_name = "Daniel Sparber & Julian Schnitzler"
 
 ############################################################
 # Imports
@@ -52,12 +52,12 @@ MORSE_CODE_DICT = { 'A':'.-', 'B':'-...', 'C':'-.-.', 'D':'-..', 'E':'.', 'F':'.
 
 class R2D2(object):
 
-    def __init__(self, robot):
+    def __init__(self, robot='Q5-92D6'):
         self.init_color_names_to_rgb()
         self.droid = DroidClient() 
         self.droid.scan() # Scan for droids.
         # Connect to your robot.
-        self.droid.connect_to_droid('D2-55A2')
+        self.droid.connect_to_droid(robot)
 
     def drive_square(self):
         for i in range(4):
@@ -100,9 +100,9 @@ class R2D2(object):
     def set_lights(self, color_name, which_light='both'):
         r, g, b = self.color_names_to_rgb[color_name]
         if which_light in ["front", "both"]:
-            droid.set_front_LED_color(r, g, b)
+            self.droid.set_front_LED_color(r, g, b)
         if which_light in ["back", "both"]:
-            droid.set_back_LED_color(r, g, b)
+            self.droid.set_back_LED_color(r, g, b)
 
     def set_colors(self, which_light='both'):
         self.set_lights("red", which_light)
@@ -113,36 +113,36 @@ class R2D2(object):
             time.sleep(seconds)
 
     def drive_with_keyboard(self, speed_increment=.1, heading_increment=45, duration=0.1):
-        speed = 0
+        speed = 0.5
         heading = 0
-        max_speed = 255
+        max_speed = 1
         while True:
             key = getkey()
             if key == 'esc':
                 break
             elif key == 'up':
-                speed += speed_increment
+                speed = min(max_speed, speed + speed_increment)
             elif key == 'down':
-                speed -= speed_increment
+                speed = max(0, speed - speed_increment)
             elif key == 'left':
-                heading += heading_increment
+                heading = (heading - heading_increment) % 360
             elif key == 'right':
-                heading -= heading_increment
+                heading = (heading + heading_increment) % 360
 
             self.droid.roll(speed, heading, duration)
 
 
     def encode_in_morse_code(self, message):
-        for letter in message:
+        for letter in message.upper():
             if letter not in MORSE_CODE_DICT:
                 continue
 
             yield MORSE_CODE_DICT[letter]
 
     def blink(self, length):
-        droid.set_holo_projector_intensity(1)
+        self.droid.set_holo_projector_intensity(1)
         time.sleep(length)
-        droid.set_holo_projector_intensity(0)
+        self.droid.set_holo_projector_intensity(0)
 
     def play_message(self, message, short_length=0.1, long_length=0.3, 
                      length_between_blips=0.1, length_between_letters=0.5):
