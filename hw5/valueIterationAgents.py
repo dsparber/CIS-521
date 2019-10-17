@@ -44,7 +44,14 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.values = util.Counter() # A Counter is a dict with default 0
 
         # Write value iteration code here
-        "*** YOUR CODE HERE ***"
+        for _ in range(iterations):
+            new_values = util.Counter()
+            for state in self.mdp.getStates():
+                max_action = self.computeActionFromValues(state)
+                if max_action:
+                    new_values[state] = self.getQValue(state, max_action)
+            
+            self.values = new_values
 
 
     def getValue(self, state):
@@ -59,8 +66,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        value = 0
+        for next_state, prop in self.mdp.getTransitionStatesAndProbs(state, action):
+            reward = self.mdp.getReward(state, action, next_state)
+            value += prop * (reward + self.discount * self.values[next_state])
+        return value
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +82,15 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        max_value = None
+        max_action = None
+        for action in self.mdp.getPossibleActions(state):
+            value = self.getQValue(state, action)
+            if max_value is None or max_value < value:
+                max_value = value
+                max_action = action
+
+        return max_action
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
