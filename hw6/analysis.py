@@ -22,26 +22,23 @@
 def question6():
     answerEpsilon = 0.9
     answerLearningRate = 1
-    return answerEpsilon, answerLearningRate
-    # If not possible, return 'NOT POSSIBLE'
+    # return answerEpsilon, answerLearningRate
+    # If not possible, 
+    return 'NOT POSSIBLE'
 
 ############
-# Feedback #
+# Feedback #python pacman.py -p PacmanQAgent -n 10 -l smallGrid -a numTraining=10
 ############
 
 # Just an approximation is fine.
-feedback_question_1 = 0
+feedback_question_1 = 2
 
 feedback_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+Finding values for question 3
 """
 
 feedback_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+Liked everything! Nothing needs to be changed
 """
 
 if __name__ == '__main__':
