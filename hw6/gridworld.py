@@ -574,12 +574,17 @@ if __name__ == '__main__':
         print()
         print()
 
+    import time
+
+
     # DISPLAY POST-LEARNING VALUES / Q-VALUES
     if opts.agent == 'q' and not opts.manual:
         try:
             display.displayQValues(a, message = "Q-VALUES AFTER "+str(opts.episodes)+" EPISODES")
+            time.sleep(0.1)
             display.pause()
             display.displayValues(a, message = "VALUES AFTER "+str(opts.episodes)+" EPISODES")
             display.pause()
         except KeyboardInterrupt:
             sys.exit(0)
+
