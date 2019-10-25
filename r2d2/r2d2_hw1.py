@@ -52,9 +52,9 @@ MORSE_CODE_DICT = { 'A':'.-', 'B':'-...', 'C':'-.-.', 'D':'-..', 'E':'.', 'F':'.
 
 class R2D2(object):
 
-    def __init__(self, robot='Q5-92D6'):
+    def __init__(self, droid=None, robot='Q5-92D6'):
         self.init_color_names_to_rgb()
-        self.droid = DroidClient() 
+        self.droid = droid or DroidClient() 
         self.droid.scan() # Scan for droids.
         # Connect to your robot.
         self.droid.connect_to_droid(robot)
@@ -109,7 +109,7 @@ class R2D2(object):
 
     def flash_colors(self, colors, seconds=1):
         for color_name in colors:
-            self.set_lights(color_name)
+            self.set_lights(color_name, which_light='front')
             time.sleep(seconds)
 
     def drive_with_keyboard(self, speed_increment=.1, heading_increment=45, duration=0.1):
@@ -154,4 +154,4 @@ class R2D2(object):
             time.sleep(length_between_letters)
 
 def sort_lambda(roll_commands):
-    roll_commands.sort(key=lambda c: (c[2], c[1]))
+    roll_commands.sort(key=lambda c: (c[2], c[0]))
