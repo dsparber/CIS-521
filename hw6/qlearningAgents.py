@@ -123,9 +123,7 @@ class QLearningAgent(ReinforcementAgent):
         """
         key = (state, action)
         
-        qs = [self.getQValue(nextState, a) for a in self.getLegalActions(nextState)]
-
-        sample = reward + self.discount * (max(qs) if qs else 0.0)
+        sample = reward + self.discount * self.computeValueFromQValues(nextState)
 
         self.q_values[key] = (1 - self.alpha) * self.q_values[key] + self.alpha * sample
         
@@ -197,10 +195,9 @@ class ApproximateQAgent(PacmanQAgent):
         """
            Should update your weights based on transition
         """
+        difference = (reward + self.discount * self.computeValueFromQValues(nextState)) - self.getQValue(state, action)
+
         for key, value in self.featExtractor.getFeatures(state, action).items():
-          next_actions = self.getLegalActions(nextState)
-          max_q = max([self.getQValue(nextState, a) for a in next_actions]) if next_actions else 0
-          difference = (reward + self.discount * max_q) - self.getQValue(state, action)
           self.weights[key] = self.weights[key] + self.alpha * difference * value
 
     def final(self, state):
