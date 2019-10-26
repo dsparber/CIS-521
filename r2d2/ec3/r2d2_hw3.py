@@ -58,17 +58,24 @@ class FlagCaptureGraph:
                 return True
         return False
 
+    def get_new_position(self, start, move_direction):
+        row, col = start
+        dx = 1 if move_direction == "east" else (-1 if move_direction == "west"  else 0)
+        dy = 1 if move_direction == "south" else (-1 if move_direction == "north"  else 0)
+        new_pos = (row + dy, col + dx)
+        return new_pos
+
     def islegalmove(self, move_robot, move_direction):
         '''
         Return a boolean indicating if a movement is legal
         '''
         dx = 1 if move_direction == "east" else (-1 if move_direction == "west"  else 0)
         dy = 1 if move_direction == "south" else (-1 if move_direction == "north"  else 0)
-        row, col = self.robots_pos[move_robot]
-        new_pos = (row + dy, col + dx)
+        cur_pos = self.robots_pos[move_robot]
+        new_pos = self.get_new_position(cur_pos, move_direction)
 
         # New position not a neighbor of current position
-        if new_pos not in self.neighbors((row, col)):
+        if new_pos not in self.neighbors(cur_pos):
             return False
 
         # Robot at new position
@@ -93,13 +100,19 @@ class FlagCaptureGraph:
         '''
         Execute the movement of the robot and update the game accordingly, updating robots_pos, flags_pos.
         '''
-        pass
+        cur_pos = self.robots_pos[move_robot]
+        new_pos = self.get_new_position(cur_pos, move_direction)
+        self.robots_pos[move_robot] = new_pos
 
     def copy(self):
         '''
         Return a deep copy of the current FlagCaptureGraph object
         '''
-        pass
+        E = self.edges[:]
+        V = self.vertics[:]
+        robots_pos = {k: v for k, v in self.robots_pos.items()}
+        flags_pos = {k: v for k, v in self.flags_pos.items()}
+        return FlagCaptureGraph(V, E, robots_pos, flags_pos)
         
     def successors(self, D2):
         '''
@@ -108,7 +121,19 @@ class FlagCaptureGraph:
         the movements of the two robots (a dictionary with keys of the robots and their
         move directions), as well as a copy of the new game object after these moves are performed.
         '''
-        pass
+        player = "D2" if D2 else "Q5"
+        robot1 = "{}_1".format(player)
+        robot2 = "{}_2".format(player)
+        for move1 in self.legalmoves(robot1):
+            game1 = self.copy()
+            game1.perform_move(robot1, move1)
+            for move2 in game1.legalmoves(robot2):
+                moves = dict()
+                moves[robot1] = move1
+                moves[robot2] = move2
+                game2 = game1.copy()
+                game2.perform_move(robot2, move2)
+                yield (moves, game2)
     
     ##############################################
     ##                  Part 3                  ##
@@ -386,24 +411,11 @@ V, E = generate_map(4, 4, [])
 robots_pos = {'D2_1': (0, 0), 'D2_2': (1, 0), 'Q5_1': (2, 3), 'Q5_2': (3, 3)}
 flags_pos = {'flag_D2': (3, 2), 'flag_Q5': (0, 1)}
 graph = FlagCaptureGraph(V, E, robots_pos, flags_pos)
-printmap(graph)
-print(graph.neighbors((0, 0)))
-print(graph.neighbors((0, 1)))
-print(graph.dist_between((0, 0), (0, 1)))
-print(graph.dist_between((0, 0), (1, 1)))
 
-V, E = generate_map(4, 4, [])
-robots_pos = {'D2_1': (0, 0), 'D2_2': (1, 0), 'Q5_1': (2, 3), 'Q5_2': (3, 3)}
-flags_pos = {'flag_D2': (3, 2), 'flag_Q5': (0, 1)}
-graph = FlagCaptureGraph(V, E, robots_pos, flags_pos)
+for move, game in graph.successors(D2 = True):
+    print(move)
+    printmap(game)
 
-printmap(graph)
-print(graph.islegalmove('D2_1', 'east'))
-print(graph.islegalmove('D2_1', 'south'))
-print(graph.legalmoves('D2_1'))
-print(graph.legalmoves('D2_2'))
-
-robots_pos = {'D2_1': (0, 0), 'D2_2': (1, 0), 'Q5_1': (0, 1), 'Q5_2': (1, 1)}
-graph = FlagCaptureGraph(V, E, robots_pos, flags_pos)
-printmap(graph)
-print(graph.legalmoves('D2_1'))
+for move, game in graph.successors(D2 = False):
+    print(move)
+    printmap(game)
